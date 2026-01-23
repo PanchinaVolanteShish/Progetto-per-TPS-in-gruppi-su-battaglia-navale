@@ -1,0 +1,1 @@
+Il server deve chiamare il thread, che aspetta la connessione di un client, per ogni giocatore che si connette. Una volta che ricevuto la richiesta chiama il thread, questo si occupa della logica di gioco, e il gioco gestisce la comunicazione con il client.
