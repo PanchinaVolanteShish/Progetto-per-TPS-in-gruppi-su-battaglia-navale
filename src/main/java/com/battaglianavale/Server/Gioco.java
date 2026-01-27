@@ -66,7 +66,7 @@ public class Gioco {
             } else {
                 tabella = tabellaGiocatore2;
             }
-           
+           tabella.PosizionaNave(payload);
         }
 
 }
