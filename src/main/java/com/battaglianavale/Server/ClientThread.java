@@ -85,7 +85,14 @@ public class ClientThread extends Thread {
                 case PLACE_SHIPS:
                     Map<String,String> payload= new HashMap<>();
                     payload= comunicazione.payload;
-                    
+                    try{
+                        gioco.posizionaNavi(playerId, payload);
+                        writer.write(gson.toJson(new Comunicazione(TipoMessaggio.PLACE_SHIPS_OK)));
+                    }catch(IllegalArgumentException e){
+                        writer.write(gson.toJson(new Comunicazione(TipoMessaggio.ERROR, Map.of("message", e.getMessage()))));
+                    }
+                    case GAME_START:
+                        
                 break;
             
             //gestione altri tipi di messaggi
