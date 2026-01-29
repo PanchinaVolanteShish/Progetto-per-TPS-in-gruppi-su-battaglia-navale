@@ -2,9 +2,7 @@ package com.battaglianavale.Server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.HashMap;
@@ -25,21 +23,25 @@ public class ClientThread extends Thread {
         this.partita = partita;
     }
     public void run() {
-        try{
-            InputStream input = socket.getInputStream();
-            OutputStream output = socket.getOutputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            writer = new BufferedWriter(new OutputStreamWriter(output));
+        try (
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))
+        ) {
+            writer = bw;
             String richiesta;
             //legge le richieste dal client che manda al server
             while ((richiesta = reader.readLine()) != null) {
                 Messaggio messaggio = gson.fromJson(richiesta,Messaggio.class);
                 gestoreMessaggi(messaggio, writer);
             }
-                
-           
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     @SuppressWarnings("unchecked")
