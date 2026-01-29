@@ -1,1 +1,10 @@
+com/battaglianavale/Client/Comunicazione.class
+com/battaglianavale/Server/ClientThread.class
+com/battaglianavale/Server/Server.class
+com/battaglianavale/Server/Partita.class
+com/battaglianavale/Client/Client.class
+com/battaglianavale/Server/Griglia.class
+com/battaglianavale/Server/Messaggio.class
+com/battaglianavale/Client/Gioco.class
 com/battaglianavale/Server/ClientThread$1.class
+com/battaglianavale/Server/TipoMessaggio.class

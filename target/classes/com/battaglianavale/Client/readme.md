@@ -1,1 +1,0 @@
-Il client si occupa di connettersi al server e il gioco invece gestisce la comunicazione con il server.

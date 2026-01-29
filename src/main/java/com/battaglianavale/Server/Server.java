@@ -6,13 +6,13 @@ import java.net.Socket;
 public class Server {
     public static void main(String[] args) {
         int port = 5000;
-        Gioco gioco = new Gioco();
+        Partita partita = new Partita();
         System.out.println("Avvio del server...");
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket socket = serverSocket.accept();
-                ClientThread thread = new ClientThread(socket, gioco);
+                ClientThread thread = new ClientThread(socket, partita);
                 thread.start();
             }
         } catch (Exception e) {

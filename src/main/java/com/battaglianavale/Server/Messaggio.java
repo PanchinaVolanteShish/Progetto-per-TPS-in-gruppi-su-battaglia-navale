@@ -1,11 +1,11 @@
 package com.battaglianavale.Server;
 
-public class Comunicazione {
+public class Messaggio {
 
     TipoMessaggio type;
     Object payload;
 
-    public Comunicazione(TipoMessaggio type, Object payload) {
+    public Messaggio(TipoMessaggio type, Object payload) {
         this.type = type;
         this.payload = payload;
     }
