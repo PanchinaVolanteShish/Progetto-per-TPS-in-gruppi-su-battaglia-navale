@@ -1,9 +1,12 @@
 package com.battaglianavale.Server;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class Gioco { 
         int numeroGiocatori = 0; // Numero di giocatori previsto
-        List<String> nomeGiocatori= new ArrayList<>();
-        Gson gson = new Gson();
+        List<String> nomeGiocatori = new ArrayList<>();
         int turnoCorrente = 0; // Indica di chi è il turno
         Tabella tabellaGiocatore2=new Tabella();
         Tabella tabellaGiocatore1=new Tabella();
@@ -49,15 +52,15 @@ public class Gioco {
             }
 
         }
-        public char getTabellaAvversario(int playerId) {
-            //restituisce il contenuto della tabella dell'avversario
-            if (playerId == 0) {
+        public Tabella getTabellaAvversario(int playerId) {
+            //restituisce la tabella dell'avversario
+            if (playerId == 1) {
                 return tabellaGiocatore2;
             } else {
                 return tabellaGiocatore1;
-                
             }
         }
+
         public void posizionaNavi(int playerId, Map<String,Object> payload) {
             //posiziona le navi nella tabella del giocatore
             Tabella tabella;

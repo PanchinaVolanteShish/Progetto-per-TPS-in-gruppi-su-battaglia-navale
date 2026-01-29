@@ -1,15 +1,7 @@
 package com.battaglianavale.Server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
-
-import com.battaglianavale.Client.Client;
 
 public class Server {
     public static void main(String[] args) {
@@ -17,11 +9,14 @@ public class Server {
         Gioco gioco = new Gioco();
         System.out.println("Avvio del server...");
 
-        while (true) {
-            Socket socket = serverSocket.accept();
-            ClientThread thread = new ClientThread(socket, gioco);
-            thread.start();
-            
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            while (true) {
+                Socket socket = serverSocket.accept();
+                ClientThread thread = new ClientThread(socket, gioco);
+                thread.start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

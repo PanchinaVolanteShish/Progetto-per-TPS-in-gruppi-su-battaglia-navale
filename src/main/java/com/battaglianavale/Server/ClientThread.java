@@ -1,18 +1,25 @@
 package com.battaglianavale.Server;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.Buffer;
+import java.util.HashMap;
 import java.util.Map;
+
+import com.google.gson.Gson;
 
 public class ClientThread extends Thread {
     
     Socket socket;
     Gioco gioco;
-    String nomeGiocatore;
+    int playerId;
     Gson gson = new Gson();
 
-    public Thread(Socket socket, Gioco gioco) {
+    public ClientThread(Socket socket, Gioco gioco) {
         this.socket = socket;
         this.gioco = gioco;
     }
@@ -34,7 +41,8 @@ public class ClientThread extends Thread {
             e.printStackTrace();
         }
     }
-    public void gestoreMessaggi(Comunicazione comunicazione, BufferedWriter writer) {
+    @SuppressWarnings("unchecked")
+    public void gestoreMessaggi(Comunicazione comunicazione, BufferedWriter writer) throws Exception {
         // se la comunicazione di tipo join crea la stringa e aggiunge un giocatore però se il gioco è pienio mandaa messaggio di errore
         
         switch (comunicazione.getType()) {
@@ -43,56 +51,66 @@ public class ClientThread extends Thread {
                
                 //creazione mappa per ricavare il messaggio tramite payload
 
-                Map<String,String> payload = new HashMap<>();
-                payload= comunicazione.payload;
-                nomeGiocatore = payload.get("nomeGiocatore");
+                Map<String,String> joinPayload = new HashMap<>();
+                joinPayload = (Map<String,String>) comunicazione.getPayload();
+                nomeGiocatore = joinPayload.get("playerName");
 
 
-                int playerId = gioco.AddGiocatore(nomeGiocatore);
+                this.playerId = gioco.AddGiocatore(nomeGiocatore);
                 
 
-                if (playerId == -1) {
+                if (this.playerId == -1) {
                     //invia messaggio di errore
                     //usiamo le mappe perchè dobbiamo mettere nel payload dei datai
 
                     writer.write(gson.toJson(new Comunicazione(TipoMessaggio.ERROR, Map.of("message", "Numero massimo di giocatori raggiunto, Partita piena"))));
-                    
+                    writer.newLine();
+                    writer.flush();
 
                 } else {
-                    writer.write(gson.toJson(new Comunicazione(TipoMessaggio.JOIN_OK, Map.of("playerId", Integer.toString(playerId)))));    
+                    writer.write(gson.toJson(new Comunicazione(TipoMessaggio.JOIN_OK, Map.of("playerId", Integer.toString(this.playerId)))));
+                    writer.newLine();
+                    writer.flush();
                     //invia messaggio di JOIN_OK
                 }
                 break;
             case ATTACK:
-                if(!gioco.turno(playerId)){
+                if(!gioco.turno(this.playerId)){
                     writer.write(gson.toJson(new Comunicazione(TipoMessaggio.ERROR, Map.of("message", "Non è il tuo turno"))));
+                    writer.newLine();
+                    writer.flush();
                 }else{
-                    Map<String,String> payload= new HashMap<>();
-                    payload= comunicazione.payload;
-                    int x= Integer.parseInt(payload.get("x"));
-                    int y= Integer.parseInt(payload.get("y"));
+                    Map<String,String> attackPayload = (Map<String,String>) comunicazione.getPayload();
+                    int x = Integer.parseInt(attackPayload.get("x"));
+                    int y = Integer.parseInt(attackPayload.get("y"));
                     // esegue l'atacco
-                    String risultatoAttacco= gioco.getTabellaAvversario(playerId).Attacco(x, y);
+                    String risultatoAttacco = gioco.getTabellaAvversario(this.playerId).Attacco(x, y);
 
-                    Map<String,String> attackResultPayload= new HashMap<>();
+                    Map<String,String> attackResultPayload = new HashMap<>();
                     attackResultPayload.put("x", Integer.toString(x));
                     attackResultPayload.put("y", Integer.toString(y));
                     attackResultPayload.put("result", risultatoAttacco);
                     writer.write(gson.toJson(new Comunicazione(TipoMessaggio.ATTACK_RESULT, attackResultPayload)));
+                    writer.newLine();
+                    writer.flush();
                     //cambia turno
                     gioco.cambiaTurno();
                 }
-                case PLACE_SHIPS:
-                    Map<String,String> payload= new HashMap<>();
-                    payload= comunicazione.payload;
-                    try{
-                        gioco.posizionaNavi(playerId, payload);
-                        writer.write(gson.toJson(new Comunicazione(TipoMessaggio.PLACE_SHIPS_OK)));
-                    }catch(IllegalArgumentException e){
-                        writer.write(gson.toJson(new Comunicazione(TipoMessaggio.ERROR, Map.of("message", e.getMessage()))));
-                    }
-                    case GAME_START:
-                        
+                break;
+            case PLACE_SHIPS:
+                Map<String,Object> shipsPayload = (Map<String,Object>) comunicazione.getPayload();
+                try{
+                    gioco.posizionaNavi(this.playerId, shipsPayload);
+                    writer.write(gson.toJson(new Comunicazione(TipoMessaggio.PLACE_SHIPS_OK, null)));
+                    writer.newLine();
+                    writer.flush();
+                }catch(IllegalArgumentException e){
+                    writer.write(gson.toJson(new Comunicazione(TipoMessaggio.ERROR, Map.of("message", e.getMessage()))));
+                    writer.newLine();
+                    writer.flush();
+                }
+                break;
+            default:
                 break;
             
             //gestione altri tipi di messaggi
