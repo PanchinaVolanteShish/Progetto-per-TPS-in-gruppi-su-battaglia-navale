@@ -1,28 +1,27 @@
 package com.battaglianavale.Client;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-
-import com.google.gson.Gson;
+import java.util.Scanner;
 
 public class Client {
-
-    public static void main (String[] args)
-    {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("=== CLIENT BATTLAGLIA NAVALE ===");
+        System.out.print("Inserisci il tuo nome: ");
+        String nome = scanner.nextLine();
+        
+        // Usa valori di default o parametri da riga di comando
         String host = "localhost";
         int porta = 5000;
-        Gson gson = new Gson();
-
-        try (Socket socket = new Socket(host, porta))
-        {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
+        if (args.length >= 1) host = args[0];
+        if (args.length >= 2) porta = Integer.parseInt(args[1]);
+        
+        System.out.println("Connessione a " + host + ":" + porta + "...");
+        
+        Gioco gioco = new Gioco(host, porta, nome);
+        gioco.start();
+        
+        scanner.close();
     }
-    
 }
